@@ -1,8 +1,14 @@
+import org.gradle.api.JavaVersion
+
+
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
+
 }
 
 android {
@@ -30,6 +36,7 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
 }
 
 dependencies {
@@ -43,6 +50,9 @@ dependencies {
     // Hilt
     implementation("com.google.dagger:hilt-android:2.50")
     kapt("com.google.dagger:hilt-compiler:2.50")
+    // Hilt ViewModel + navigation
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.7.7")
     // Retrofit
@@ -57,6 +67,12 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     // Coil
     implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    implementation("com.google.firebase:firebase-database-ktx")
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.0")
+
 
 }
 

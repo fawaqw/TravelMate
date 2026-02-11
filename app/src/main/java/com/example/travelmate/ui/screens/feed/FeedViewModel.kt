@@ -1,4 +1,4 @@
-package com.exaple.travelmate.ui.screens.feed
+package com.example.travelmate.ui.screens.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.travelmate.domain.model.Place
+import kotlinx.coroutines.flow.StateFlow
 
 
 @HiltViewModel
@@ -16,12 +18,23 @@ class FeedViewModel @Inject constructor(
     private val repo: PlaceRepository
 ) : ViewModel() {
 
-    val places = repo.getPlaces()
-        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    private var offset = 0
+
+    val places: StateFlow<List<Place>> =
+        repo.getPlaces().stateIn(
+            viewModelScope,
+            SharingStarted.Lazily,
+            emptyList()
+        )
 
     init {
+        loadMore()
+    }
+
+    fun loadMore() {
         viewModelScope.launch {
-            (repo as PlaceRepositoryImpl).refreshCities()
+            (repo as PlaceRepositoryImpl).refreshCities(offset)
+            offset += 20
         }
     }
 }

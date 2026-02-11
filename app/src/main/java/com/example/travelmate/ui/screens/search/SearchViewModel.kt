@@ -3,6 +3,7 @@ package com.example.travelmate.ui.screens.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.travelmate.domain.repository.PlaceRepository
+import com.example.travelmate.ui.components.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -12,6 +13,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
+import com.example.travelmate.domain.model.Place
+import kotlinx.coroutines.flow.StateFlow
 
 
 @HiltViewModel
@@ -21,7 +24,7 @@ class SearchViewModel @Inject constructor(
 
     private val query = MutableStateFlow("")
 
-    val uiState = query
+    val uiState: StateFlow<UiState<List<Place>>> = query
         .debounce(500)
         .filter { it.isNotBlank() }
         .flatMapLatest { q ->

@@ -1,12 +1,16 @@
 package com.example.travelmate.data.repository
 
 import com.example.travelmate.data.local.CityDao
+import com.example.travelmate.data.mapper.toDomain
 import com.example.travelmate.data.mapper.toEntity
 import com.example.travelmate.data.remote.GeoDbApi
 import com.example.travelmate.domain.model.Place
 import com.example.travelmate.domain.repository.PlaceRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+
 
 
 
@@ -16,10 +20,11 @@ class PlaceRepositoryImpl @Inject constructor(
     private val dao: CityDao
 ) : PlaceRepository {
 
-    override fun getPlaces(): Flow<List<Place>> =
-        dao.getCities().map { list ->
+    override fun getPlaces(): Flow<List<Place>> {
+        return dao.getCities().map { list ->
             list.map { it.toDomain() }
         }
+    }
 
     override suspend fun searchPlaces(query: String): List<Place> {
         val response = api.searchCities(query)
@@ -35,9 +40,9 @@ class PlaceRepositoryImpl @Inject constructor(
             .toDomain()
     }
 
-    suspend fun refreshCities(offset: Int = 0) {
+    suspend fun refreshCities(offset: Int) {
         val response = api.getCities(offset = offset)
-        val entities = response.data.map { it.toEntity() }
-        dao.insertAll(entities)
+        dao.insertAll(response.data.map { it.toEntity() })
     }
+
 }

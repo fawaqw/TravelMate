@@ -1,5 +1,8 @@
 package com.example.travelmate.data.mapper
 
+import android.R.attr.country
+import android.R.attr.name
+import com.example.travelmate.data.local.entity.CityEntity
 import com.example.travelmate.data.remote.dto.CityDto
 import com.example.travelmate.domain.model.Place
 

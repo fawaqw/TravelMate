@@ -1,6 +1,8 @@
 package com.example.travelmate.data.remote
 
 import com.example.travelmate.data.remote.dto.CityResponse
+import retrofit2.http.GET
+import retrofit2.http.Query
 
 interface GeoDbApi {
 

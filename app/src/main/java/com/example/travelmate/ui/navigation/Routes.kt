@@ -8,4 +8,6 @@ sealed class Routes(val route: String) {
     object Search : Routes("search")
     object CreateReview : Routes("create_review/{placeId}")
     object Profile : Routes("profile")
+    object Login : Routes("login")
+
 }
