@@ -1,14 +1,11 @@
 import org.gradle.api.JavaVersion
 
-
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
-
 }
 
 android {
@@ -39,7 +36,6 @@ android {
         jvmTarget = "17"
     }
 }
-
 
 dependencies {
     // Compose
@@ -75,10 +71,11 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.0")
 
-
+    // Testing
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 }
 
 kapt {
     correctErrorTypes = true
 }
-
