@@ -2,12 +2,12 @@ package com.example.travelmate.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.*
-import com.example.travelmate.FeedScreen
+import com.example.travelmate.ui.screens.feed.FeedScreen
 import com.example.travelmate.ui.screens.*
 import com.example.travelmate.ui.screens.auth.LoginScreen
 import com.example.travelmate.ui.screens.details.DetailsScreen
 import com.example.travelmate.ui.screens.review.CreateReviewScreen
-import com.exaple.travelmate.ui.screens.profile.ProfileScreen
+import com.example.travelmate.ui.screens.profile.ProfileScreen
 
 @Composable
 fun TravelNavHost() {
