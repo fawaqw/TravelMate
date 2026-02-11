@@ -8,13 +8,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import com.example.travelmate.domain.model.Place
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 
 @HiltViewModel
@@ -22,13 +22,17 @@ class SearchViewModel @Inject constructor(
     private val repo: PlaceRepository
 ) : ViewModel() {
 
-    private val query = MutableStateFlow("")
+    private val _query = MutableStateFlow("")
+    val query = _query.asStateFlow()
 
-    val uiState: StateFlow<UiState<List<Place>>> = query
+    val uiState: StateFlow<UiState<List<Place>>> = _query
         .debounce(500)
-        .filter { it.isNotBlank() }
         .flatMapLatest { q ->
             flow {
+                if (q.isBlank()) {
+                    emit(UiState.Success(emptyList()))
+                    return@flow
+                }
                 emit(UiState.Loading)
                 try {
                     val result = repo.searchPlaces(q)
@@ -39,9 +43,9 @@ class SearchViewModel @Inject constructor(
                 }
             }
         }
-        .stateIn(viewModelScope, SharingStarted.Lazily, UiState.Empty)
+        .stateIn(viewModelScope, SharingStarted.Lazily, UiState.Success(emptyList()))
 
     fun onQueryChange(new: String) {
-        query.value = new
+        _query.value = new
     }
 }

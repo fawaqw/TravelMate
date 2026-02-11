@@ -9,5 +9,6 @@ sealed class Routes(val route: String) {
     object CreateReview : Routes("create_review/{placeId}")
     object Profile : Routes("profile")
     object Login : Routes("login")
+    object SignUp : Routes("signup")
 
 }
