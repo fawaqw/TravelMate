@@ -46,6 +46,12 @@ class FeedViewModel @Inject constructor(
         loadMore()
     }
 
+    fun toggleFavorite(placeId: String) {
+        viewModelScope.launch {
+            repo.toggleFavorite(placeId)
+        }
+    }
+
     fun loadMore() {
         if (_isRefreshing.value) return
         

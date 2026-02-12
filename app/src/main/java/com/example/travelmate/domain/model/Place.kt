@@ -8,5 +8,6 @@ data class Place(
     val imageUrl: String = "",
     val description: String = "",
     val rating: Double = 0.0,
-    val category: String = ""
+    val category: String = "",
+    val isFavorite: Boolean = false
 )

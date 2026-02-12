@@ -10,4 +10,8 @@ interface PlaceRepository {
     suspend fun searchPlaces(query: String): List<Place>
 
     suspend fun getPlaceById(id: String): Place
+
+    suspend fun toggleFavorite(placeId: String)
+
+    suspend fun refreshCities(offset: Int)
 }

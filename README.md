@@ -1,51 +1,61 @@
-# TravelMate - Android Travel Discovery App
+# TravelMate - Android Travel Discovery App 
 
-TravelMate is a modern Android application designed for travelers to discover new places, read reviews, and share their experiences. The project is built using modern Android development practices, including Jetpack Compose, MVVM architecture, and Firebase integration.
+TravelMate is a feature-rich Android application designed for travelers to discover global destinations, manage a personal list of favorites, and participate in a real-time review community.
 
-## Features
+## Key Features
 
-### 1. Screens and Navigation
-- **Feed/List Screen**: Browse travel destinations with high-quality images and real-time average ratings.
-- **Details Screen**: In-depth info, description, and user reviews with author names.
-- **Search Screen**: Hybrid search (Local + Firebase + Remote API) with debouncing.
-- **Authentication**: Secure Sign-In and Sign-Up (including Name/Nickname) via Firebase Auth.
-- **Profile Screen**: User info, session management, and "My Reviews" section with deletion logic.
-- **Review System**: Add reviews with star ratings. Integrated Real-time DB updates.
+### 1. Screens and Navigation (Criteria 4.1)
+- **Feed Screen**: Explore places with Lottie animations, real-time ratings, and an offline-mode indicator.
+- **Details Screen**: Comprehensive place info, real-time heart toggle for favorites, and a list of user reviews with author names.
+- **Search Screen**: Hybrid search (Firebase + Room + GeoDB) with debounced input (500ms) to optimize performance.
+- **Profile Screen**: Displays user info, a horizontal "Favorite Places" list, and a history of personal reviews.
+- **Auth (Login/SignUp)**: Secure flows with Firebase Auth. SignUp now captures user's Full Name.
+- **Forms & Validation**: Login and SignUp screens feature real-time field validation with user-friendly error messages under the fields.
 
-### 2. Architecture & Tech Stack
-- **UI**: Jetpack Compose
-- **Architecture**: MVVM + Repository pattern.
+### 2. Real-time & User Data (Criteria 4.3 & 4.6)
+- **Favorites System**: Each user has a unique "Favorites" list stored in Firebase. Status syncs instantly between the Feed and Details screens.
+- **Reviews Community**: CRUD operations for reviews. Users can see names of authors.
+- **Business Rule (Criteria 4.2)**: Users can only delete their own reviews within **24 hours** of posting.
+- **Dynamic Scoring**: The rating displayed on each place card is a real-time average calculated from all user reviews in Firebase.
+
+### 3. Advanced Networking & Persistence (Criteria 4.4 & 4.5)
+- **Offline-First**: All places fetched from Firebase/API are mirrored to a local **Room Database**.
+- **Seamless Sync**: App detects connection loss using a `ConnectivityObserver` and displays an "Offline Mode" banner, serving cached data.
+- **UI States**: Professional states for Loading (Lottie), Success, Empty (Lottie), and Error with retry logic.
+
+### 4. Technical Stack
+- **Architecture**: Clean MVVM + Repository pattern.
 - **Dependency Injection**: Hilt (Dagger).
-- **Concurrency**: Kotlin Coroutines & Flow.
+- **Concurrency**: Kotlin Coroutines & Flow/StateFlow for reactive data.
+- **Libraries**: 
+  - **Coil**: Async image loading.
+  - **Lottie**: High-quality UI animations.
+  - **Retrofit**: GeoDB API integration.
+  - **Firebase**: Auth & Realtime Database.
 
-### 3. Data & Networking
-- **Backend**: Firebase Realtime Database & Auth.
-- **Offline-First**: Room DB local caching for cities.
-- **Image Loading**: Coil (Async loading).
+## Testing & Stability (Criteria 4.9)
+- **Unit Tests**: 5 comprehensive tests in `BusinessLogicTest.kt` covering Mappers, Deletion Policy (24h rule), and Rating Calculations.
+  - **Robustness**: Handled common scenarios like wrong credentials, no internet, and empty API responses without crashes.
 
-## Testing & Stability
+## Configuration Steps
 
-### Unit Tests
-Located in `app/src/test/java/com/example/travelmate/BusinessLogicTest.kt`.
-1. `cityEntityToDomain calculates rating`: Validates the business logic for initial rating generation.
-2. `cityEntityToDomain formats name`: Ensures correct data transformation for UI.
-3. `review deletion policy (Allowed)`: Tests that reviews < 24h old can be deleted.
-4. `review deletion policy (Forbidden)`: Tests that reviews > 24h old cannot be deleted.
-5. `average rating calculation`: Validates the logic for aggregating user scores.
+1. **Firebase Setup**:
+   - Place `google-services.json` in the `app/` folder.
+   - Enable **Email/Password Authentication** in Firebase Console.
+   - Create a **Realtime Database** and set rules to allow read/write for authenticated users.
+2. **API Key**:
+   - In `com.example.travelmate.di.NetworkModule`, replace `PUT_YOUR_KEY_HERE` with your RapidAPI key for the GeoDB API.
+3. **Build**:
+   - Sync Gradle and run the `:app` module.
 
-### Manual Test Checklist
-1. [ ] **Auth**: Sign up with name, email, and password. Check if name appears in profile.
-2. [ ] **Auth**: Login with wrong credentials (should show error message).
-3. [ ] **Feed**: Scroll down to trigger pagination (if > 10 items).
-4. [ ] **Search**: Type "Paris" and wait 500ms (debounce). Verify results appear.
-5. [ ] **Details**: Open a place, verify image and description load.
-6. [ ] **Reviews**: Add a 5-star review. Verify it appears instantly in the list.
-7. [ ] **Real-time**: Add a review and check if the average rating on the Feed card updates.
-8. [ ] **Profile**: Verify "My Reviews" displays correct place names and delete icons.
-9. [ ] **Deletion**: Delete a review created less than 24h ago. Verify it disappears.
-10. [ ] **Offline**: Disable internet. Verify cached places are still visible in Feed.
-
-## Configuration
-1. Add `google-services.json` to `app/`.
-2. Enable Email/Password Auth & Realtime DB in Firebase.
-3. Replace API Key in `NetworkModule.kt` for GeoDB.
+## Manual Test Checklist
+1. [x] **Sign Up**: Register a new user with a name. Verify name appears in Profile.
+2. [x] **Login Validation**: Try logging in with a short password (<6 chars). Check error message.
+3. [x] **Real-time Favorites**: Heart a place in Feed, open Details — verify it's also hearted there.
+4. [x] **Average Rating**: Add a 1-star review to a place. Verify its Feed rating drops instantly.
+5. [x] **Search Debounce**: Type slowly in Search. Verify results update after you stop typing.
+6. [x] **Offline Banner**: Turn off Wi-Fi. Verify "Offline Mode" banner appears and data remains.
+7. [x] **Review Deletion**: Post a review and delete it. Verify it works.
+8. [x] **24h Policy**: Manually set an old timestamp in Firebase for a review. Verify the delete icon disappears in the app.
+9. [x] **Navigation**: Log out from Profile. Verify you are redirected to Login and can't go "back" to Profile.
+10. [x] **Lottie**: Open the app and observe the "Searching..." animation before data loads.

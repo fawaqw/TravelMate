@@ -70,6 +70,9 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-analytics")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.0")
+    
+    // Lottie (Requirement 4.7)
+    implementation("com.airbnb.android:lottie-compose:6.3.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

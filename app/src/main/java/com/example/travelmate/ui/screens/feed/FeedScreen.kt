@@ -8,9 +8,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
@@ -30,6 +33,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.travelmate.domain.model.Place
+import com.example.travelmate.ui.components.EmptyListAnimation
+import com.example.travelmate.ui.components.LottieLoader
 import com.example.travelmate.ui.components.UiState
 import com.example.travelmate.ui.navigation.Routes
 import com.example.travelmate.util.ConnectivityObserver
@@ -69,7 +74,13 @@ fun FeedScreen(
         ) {
             when (val currentState = state) {
                 is UiState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        LottieLoader()
+                        Text("Searching for the best places...", style = MaterialTheme.typography.bodyMedium)
+                    }
                 }
                 is UiState.Error -> {
                     Column(
@@ -83,7 +94,13 @@ fun FeedScreen(
                     }
                 }
                 is UiState.Empty -> {
-                    Text("No places found", modifier = Modifier.align(Alignment.Center))
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        EmptyListAnimation()
+                        Text("No places found", style = MaterialTheme.typography.bodyMedium)
+                    }
                 }
                 is UiState.Success -> {
                     LazyColumn(
@@ -96,9 +113,11 @@ fun FeedScreen(
                                 vm.loadMore()
                             }
 
-                            PlaceCard(place = place) {
-                                navController.navigate(Routes.Details.create(place.id))
-                            }
+                            PlaceCard(
+                                place = place,
+                                onToggleFavorite = { vm.toggleFavorite(place.id) },
+                                onClick = { navController.navigate(Routes.Details.create(place.id)) }
+                            )
                         }
 
                         if (isRefreshing) {
@@ -153,7 +172,11 @@ fun OfflineBanner(visible: Boolean) {
 }
 
 @Composable
-fun PlaceCard(place: Place, onClick: () -> Unit) {
+fun PlaceCard(
+    place: Place,
+    onToggleFavorite: () -> Unit,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -162,14 +185,33 @@ fun PlaceCard(place: Place, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column {
-            AsyncImage(
-                model = place.imageUrl,
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp),
-                contentScale = ContentScale.Crop
-            )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                AsyncImage(
+                    model = place.imageUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp),
+                    contentScale = ContentScale.Crop
+                )
+                
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(12.dp)
+                        .size(36.dp)
+                        .clickable { onToggleFavorite() },
+                    shape = CircleShape,
+                    color = Color.Black.copy(alpha = 0.3f)
+                ) {
+                    Icon(
+                        imageVector = if (place.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = "Favorite",
+                        tint = if (place.isFavorite) Color.Red else Color.White,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+            }
             
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(
