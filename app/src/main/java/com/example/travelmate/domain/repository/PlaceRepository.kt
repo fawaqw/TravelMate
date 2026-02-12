@@ -13,5 +13,5 @@ interface PlaceRepository {
 
     suspend fun toggleFavorite(placeId: String)
 
-    suspend fun refreshCities(offset: Int)
+    suspend fun refreshCities(offset: Int, limit: Int = 20)
 }

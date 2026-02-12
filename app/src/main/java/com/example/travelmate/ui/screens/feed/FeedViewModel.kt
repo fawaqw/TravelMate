@@ -20,6 +20,7 @@ class FeedViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var offset = 0
+    private val PAGE_SIZE = 20
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing = _isRefreshing.asStateFlow()
 
@@ -59,8 +60,8 @@ class FeedViewModel @Inject constructor(
             _isRefreshing.value = true
             _error.value = null
             try {
-                (repo as PlaceRepositoryImpl).refreshCities(offset)
-                offset += 20
+                repo.refreshCities(offset, PAGE_SIZE)
+                offset += PAGE_SIZE
             } catch (e: Exception) {
                 _error.value = e.localizedMessage ?: "Unknown error"
             } finally {

@@ -110,9 +110,9 @@ class PlaceRepositoryImpl @Inject constructor(
         return getPlaces().first().firstOrNull { it.id == id } ?: Place()
     }
 
-    override suspend fun refreshCities(offset: Int) {
+    override suspend fun refreshCities(offset: Int, limit: Int) {
         try {
-            val response = api.getCities(offset = offset)
+            val response = api.getCities(offset = offset, limit = limit)
             dao.insertAll(response.data.map { it.toEntity() })
         } catch (e: Exception) {
             Log.e("PlaceRepository", "Error refreshing cities", e)
