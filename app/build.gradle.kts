@@ -17,11 +17,38 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0" // Semantic Versioning
         testInstrumentationRunner = "com.example.travelmate.HiltTestRunner"
     }
 
-    buildFeatures { compose = true }
+    signingConfigs {
+        create("release") {
+            storeFile = file("../release-key.jks")
+            storePassword = "password"
+            keyAlias = "release-key"
+            keyPassword = "password"
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+            isDebuggable = true
+            buildConfigField("String", "BASE_URL", "\"https://wft-geo-db.p.rapidapi.com/\"")
+        }
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
+            buildConfigField("String", "BASE_URL", "\"https://wft-geo-db.p.rapidapi.com/\"") // In real app, might be different
+        }
+    }
+
+    buildFeatures { 
+        compose = true 
+        buildConfig = true
+    }
 
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
