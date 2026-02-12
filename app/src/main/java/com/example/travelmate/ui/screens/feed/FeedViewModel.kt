@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.travelmate.data.repository.PlaceRepositoryImpl
 import com.example.travelmate.domain.repository.PlaceRepository
 import com.example.travelmate.ui.components.UiState
+import com.example.travelmate.util.ConnectivityObserver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -14,7 +15,8 @@ import com.google.firebase.database.FirebaseDatabase
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
-    private val repo: PlaceRepository
+    private val repo: PlaceRepository,
+    private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
     private var offset = 0
@@ -23,6 +25,9 @@ class FeedViewModel @Inject constructor(
 
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
+
+    val networkStatus = connectivityObserver.observe()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ConnectivityObserver.Status.Available)
 
     val places: StateFlow<List<Place>> = repo.getPlaces()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())

@@ -41,7 +41,9 @@ object NetworkModule {
 
     @Provides
     fun provideDb(@ApplicationContext ctx: Context) =
-        Room.databaseBuilder(ctx, AppDatabase::class.java, "travel.db").build()
+        Room.databaseBuilder(ctx, AppDatabase::class.java, "travel.db")
+            .fallbackToDestructiveMigration()
+            .build()
 
     @Provides
     fun provideCityDao(db: AppDatabase) = db.cityDao()

@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 class PlaceRepositoryImpl @Inject constructor(
@@ -28,7 +29,8 @@ class PlaceRepositoryImpl @Inject constructor(
     private val database = FirebaseDatabase.getInstance().getReference("places")
 
     override fun getPlaces(): Flow<List<Place>> {
-        val placesFlow = callbackFlow {
+        // source from Firebase, but also mirror to Room for offline access
+        val firebaseFlow = callbackFlow {
             val listener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val items = snapshot.children.mapNotNull { it.getValue(Place::class.java) }
@@ -40,15 +42,25 @@ class PlaceRepositoryImpl @Inject constructor(
             }
             database.addValueEventListener(listener)
             awaitClose { database.removeEventListener(listener) }
+        }.onEach { places ->
+            // save to local DB whenever we get updates from Firebase
+            dao.insertAll(places.map { it.toEntity() })
         }
 
-        return combine(placesFlow, reviewDataSource.observeAllReviews()) { places, reviews ->
-            places.map { place ->
+        // the UI will observe this flow. If online, it gets Firebase data (mirrored to Room).
+        // if offline, firebaseFlow will fail/stay empty, so we combine with local Room data.
+        return combine(
+            firebaseFlow, 
+            dao.getCities().map { list -> list.map { it.toDomain() } },
+            reviewDataSource.observeAllReviews()
+        ) { remote, local, reviews ->
+            val source = if (remote.isNotEmpty()) remote else local
+            source.map { place ->
                 val placeReviews = reviews.filter { it.placeId == place.id }
                 val avgRating = if (placeReviews.isNotEmpty()) {
                     placeReviews.map { it.rating }.average()
                 } else {
-                    place.rating // fallback to initial
+                    place.rating
                 }
                 place.copy(rating = Math.round(avgRating * 10.0) / 10.0)
             }
@@ -56,22 +68,11 @@ class PlaceRepositoryImpl @Inject constructor(
     }
 
     override suspend fun searchPlaces(query: String): List<Place> {
-        val firebasePlaces = getPlaces().first()
-        val filtered = firebasePlaces.filter { 
+        // try searching in the current flow (which handles both remote and local)
+        return getPlaces().first().filter { 
             it.name.contains(query, ignoreCase = true) || 
             it.city.contains(query, ignoreCase = true) ||
             it.country.contains(query, ignoreCase = true)
-        }
-        
-        if (filtered.isNotEmpty()) return filtered
-
-        val response = try { api.searchCities(query) } catch (e: Exception) { null }
-        return if (response != null) {
-            val entities = response.data.map { it.toEntity() }
-            dao.insertAll(entities)
-            entities.map { it.toDomain() }
-        } else {
-            emptyList()
         }
     }
 
@@ -84,7 +85,7 @@ class PlaceRepositoryImpl @Inject constructor(
             val response = api.getCities(offset = offset)
             dao.insertAll(response.data.map { it.toEntity() })
         } catch (e: Exception) {
-            // Log error
+            // handle error - maybe stay offline
         }
     }
 }

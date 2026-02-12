@@ -5,13 +5,6 @@ import com.example.travelmate.data.remote.dto.CityDto
 import com.example.travelmate.domain.model.Place
 
 fun CityDto.toEntity() = CityEntity(
-    id = id,
-    name = name,
-    country = country,
-    population = population
-)
-
-fun CityEntity.toDomain() = Place(
     id = id.toString(),
     name = name,
     city = name,
@@ -19,5 +12,28 @@ fun CityEntity.toDomain() = Place(
     imageUrl = "https://source.unsplash.com/600x400/?$name",
     description = "Population: $population",
     rating = (population % 5 + 1).toDouble(),
-    category = country
+    category = country,
+    population = population
+)
+
+fun CityEntity.toDomain() = Place(
+    id = id,
+    name = name,
+    city = city,
+    country = country,
+    imageUrl = imageUrl,
+    description = description,
+    rating = rating,
+    category = category
+)
+
+fun Place.toEntity() = CityEntity(
+    id = id,
+    name = name,
+    city = city,
+    country = country,
+    imageUrl = imageUrl,
+    description = description,
+    rating = rating,
+    category = category
 )
