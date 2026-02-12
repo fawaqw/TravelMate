@@ -1,9 +1,13 @@
 package com.example.travelmate.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "cities")
+@Entity(
+    tableName = "cities",
+    indices = [Index(value = ["name"]), Index(value = ["country"])]
+)
 data class CityEntity(
     @PrimaryKey val id: String,
     val name: String,
